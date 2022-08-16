@@ -16,20 +16,26 @@ use Illuminate\Support\Facades\DB;
 $router->post('/login', [
     'as' => 'login', 'uses' => 'AuthController@login'
 ]);
-// $router->get('/signup', function(){
-//     return view();
-// });
 $router->post('/signup', [
     'as' => 'signup', 'uses' => 'AuthController@signup'
-]);
-$router->post('/users', [
-    'as' => 'users', 'uses' => 'UserController@index'
 ]);
 // $router->get('/users/create',[
 //     'as' => 'users.create','uses' => 'UserController@create'
 // ])->middleware('can:create-users');
-$router->post('/sendemail', [
-    'as' => 'sendemail', 'uses' => 'EmailController@emailRequestVerification']);
+// $router->post('/sendemail', [
+//     'as' => 'sendemail', 'uses' => 'EmailController@emailRequestVerification']);
+$router->group(['middleware' => ['auth', 'verified']], function () use ($router) {
+    $router->post('/email/request-verification', [
+        'as' => 'email.request.verification', 
+        'uses' => 'AuthController@emailRequestVerification']);
+});
+$router->post('/email/forgot-password',[
+    'as' => 'email.forgot-password', 'uses' => 'AuthController@forgot_password'
+]);
+$router->post('/email/reset-password',[
+    'as' => 'email.reset-password', 'uses' => 'AuthController@reset_password'
+]);
+
 $router->post('/email/verify', [
     'as' => 'email.verify', 'uses' => 'AuthController@emailVerify']);
 $router->post('/users/create-user',[
@@ -42,4 +48,4 @@ $router->post('admin/create-user', [
     'middleware' => 'auth',
     'uses' => 'AdminController@create_user'
 ]);
-// $router->post('/password/reset-request', 'EmailController@sendResetLinkEmail');
+$router->post('/password/reset-request', 'EmailController@sendResetLinkEmail');

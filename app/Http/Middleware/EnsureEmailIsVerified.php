@@ -19,6 +19,6 @@ class EnsureEmailIsVerified
         {
             throw new AuthorizationException('Unauthorized, your email address '.$request->user()->email.' is not verified.');
         }
-return $next($request);
+        return $next($request);
     }
 }
