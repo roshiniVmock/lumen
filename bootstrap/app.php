@@ -47,7 +47,17 @@ $app->singleton(
     Illuminate\Contracts\Console\Kernel::class,
     App\Console\Kernel::class
 );
+$app->singleton(Illuminate\Session\SessionManager::class, function () use ($app) {
+    return $app->loadComponent('session', Illuminate\Session\SessionServiceProvider::class, 'session');
+});
 
+$app->singleton('session.store', function () use ($app) {
+    return $app->loadComponent('session', Illuminate\Session\SessionServiceProvider::class, 'session.store');
+});
+$app->singleton('cookie', function () use ($app) {
+    return $app->loadComponent('session', 'Illuminate\Cookie\CookieServiceProvider', 'cookie');
+});
+$app->bind('Illuminate\Contracts\Cookie\QueueingFactory', 'cookie');
 /*
 |--------------------------------------------------------------------------
 | Register Config Files
@@ -73,11 +83,14 @@ $app->configure('app');
 */
 
 $app->middleware([
+    \Illuminate\Session\Middleware\StartSession::class,
     App\Http\Middleware\ExampleMiddleware::class
 ]);
-
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'verified' => App\Http\Middleware\EnsureEmailIsVerified::class,
+    'permission' => Spatie\Permission\Middlewares\PermissionMiddleware::class,
+    'role'       => Spatie\Permission\Middlewares\RoleMiddleware::class,
 ]);
 
 /*
@@ -95,7 +108,22 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
-// $app->register(Illuminate\Notifications\NotificationServiceProvider::class);
+$app->register(Illuminate\Mail\MailServiceProvider::class);
+$app->register(Spatie\Permission\PermissionServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->configure('mail');
+$app->configure('jwt');
+$app->configure('services');
+$app->configure('permission');
+$app->alias('mail.manager', Illuminate\Mail\MailManager::class);
+$app->alias('mail.manager', Illuminate\Contracts\Mail\Factory::class);
+$app->register(Illuminate\Session\SessionServiceProvider::class);
+$app->alias('mailer', Illuminate\Mail\Mailer::class);
+$app->alias('mailer', Illuminate\Contracts\Mail\Mailer::class);
+$app->alias('mailer', Illuminate\Contracts\Mail\MailQueue::class);
+$app->alias('cache', 'Illuminate\Cache\CacheManager');
+$app->alias('auth', 'Illuminate\Auth\AuthManager');
+$app->register(Illuminate\Notifications\NotificationServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes

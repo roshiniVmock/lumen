@@ -3,34 +3,79 @@
 namespace App\Models;
 
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Lumen\Auth\Authorizable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
+use App\Traits\MustVerifyEmail;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
 {
-    use Authenticatable, Authorizable;
+    use Authenticatable, Authorizable, Notifiable, MustVerifyEmail, HasRoles;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var string[]
+     * @var array
      */
-    public $table = 'users';
-
     protected $fillable = [
-        'name', 'email',
+        'name', 'email','fcm_token', 'created_by', 'deleted_by', 'role'
     ];
-
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
     /**
      * The attributes excluded from the model's JSON form.
      *
-     * @var string[]
+     * @var array
      */
     protected $hidden = [
         'password',
     ];
-    protected $primaryKey = 'id';
 
+
+
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
+    // protected static function boot()
+    // {
+    //     parent::boot();
+        
+    //     static::saved(function ($model) {
+    //     /**
+    //      * If user email have changed email verification is required
+    //      */
+    //         if( $model->isDirty('email') ) {
+    //             $model->setAttribute('email_verified_at', null);
+    //             $model->sendEmailVerificationNotification();
+    //         }
+    //     });
+    // }
+    
 }

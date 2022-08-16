@@ -18,6 +18,10 @@ class CreateUsersTable extends Migration
             $table->string('name')->unique();
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('created_by')->nullable();
+            $table->string('role')->nullable();
+            $table->string('deleted_by')->nullabel();
+            $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
         });
         echo Schema::hasTable('users');
