@@ -51,7 +51,7 @@ class VerifyEmail extends Notification
     protected function verificationUrl($notifiable)
     {
         $token = JWTAuth::fromUser($notifiable);
-        return route('email.verify', ['token' => $token], false);
+        return "http://localhost:3000/emailVerify?token=".$token;
     }
     /**
      * Set a callback that should be used when building the notification mail message.

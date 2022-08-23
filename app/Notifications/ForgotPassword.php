@@ -62,7 +62,8 @@ class ForgotPassword extends Notification
     public function passwordresetUrl($notifiable)
     {
         $token = JWTAuth::fromUser($notifiable);
-        return route('email.reset-password', ['token' => $token], false);
+        $email = $notifiable->getEmailForPasswordReset();
+        return "http://localhost:3000/reset-password?token=".$token."?email=".$email;
     }
 
     public static function toMailUsing($callback)

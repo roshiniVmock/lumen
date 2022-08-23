@@ -27,6 +27,9 @@ $app->withFacades();
 
 $app->withEloquent();
 
+$app->instance('path.config', app()->basePath() . DIRECTORY_SEPARATOR . 'config');
+$app->instance('path.storage', app()->basePath() . DIRECTORY_SEPARATOR . 'storage');
+
 /*
 |--------------------------------------------------------------------------
 | Register Container Bindings
@@ -86,6 +89,12 @@ $app->middleware([
     \Illuminate\Session\Middleware\StartSession::class,
     App\Http\Middleware\ExampleMiddleware::class
 ]);
+$app->middleware([
+
+    App\Http\Middleware\CorsMiddleware::class,
+]);
+ 
+ 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
     'verified' => App\Http\Middleware\EnsureEmailIsVerified::class,
@@ -111,10 +120,13 @@ $app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
 $app->register(Illuminate\Mail\MailServiceProvider::class);
 $app->register(Spatie\Permission\PermissionServiceProvider::class);
 $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->register(App\Providers\CatchAllOptionsRequestsProvider::class);
+$app->register(Illuminate\Auth\Passwords\PasswordResetServiceProvider::class);
 $app->configure('mail');
 $app->configure('jwt');
 $app->configure('services');
 $app->configure('permission');
+$app->configure('cors');
 $app->alias('mail.manager', Illuminate\Mail\MailManager::class);
 $app->alias('mail.manager', Illuminate\Contracts\Mail\Factory::class);
 $app->register(Illuminate\Session\SessionServiceProvider::class);

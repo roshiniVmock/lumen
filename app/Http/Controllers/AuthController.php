@@ -5,15 +5,22 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\RedirectResponse;
+use \Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use DB;
 class AuthController extends Controller
 {
+    
     public function signup(Request $request)
     {
         //validate incoming request 
         $this->validate($request, [
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'password' => 'required|confirmed',
+            'password' => 'required|string',
         ]);
 
         try {
@@ -27,9 +34,9 @@ class AuthController extends Controller
             $user->created_by = $user->name;
             $user->deleted_by = "-";
             $user->save();
-
+            // $this->sendWelcomeEmail($request);
             //return successful response
-            return response()->json(['user' => $user, 'message' => 'CREATED'], 201);
+            return response()->json(['status' => 200,'user' => $user, 'message' => 'CREATED'], 201);
 
         } catch (\Exception $e) {
             //return error message
@@ -37,6 +44,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'User Registration Failed!'], 409);
         }
 
+    }
+    public function sendWelcomeEmail(Request $request){
+        $request->user()->sendWelcomeEmailNotificaton();
+
+        return response()->json('Welcome '. Auth::user()->name);
     }
     public function login(Request $request)
     {
@@ -46,52 +58,61 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
         $credentials = $request->only(['email', 'password']);
-        echo "{$request->deleted_by}";
+        // echo "{$request->deleted_by}";
         if (! $token = Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-        $user = User::where('name', $request->name)->first();
+        $user = User::where('email', $request->email)->first();
         if ($user -> deleted_by != "-") {
             return response()->json(['user' => 'Deleted',"deleted_by" => $user->deleted_by], 401);
         }
         // $user->fcm_token = $token;
-        echo $user->fcm_token;
+        // echo $user->fcm_token;
         $user->save();
-        return $this->respondWithToken($token);
+        return $this->respondWithToken($token,$user);
     }
     public function forgot_password(Request $request)
     {
-        $request->user()->sendPasswordResetNotification();
-        
-        return response()->json('Reset password link sent to '. Auth::user()->email);
+        // echo "I am in forgot-password";
+        $this->validate($request, [
+            'email' => 'required|email'
+        ]);
+        $token = Str::random(64);
+        DB::table('password_resets')->insert([
+            'email' => $request->email, 
+            'token' => $token, 
+            'created_at' => Carbon::now()
+          ]);
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+        return response()->json(['status' => $status]);
     }
     public function reset_password(Request $request)
     {
+        // echo "Hello";
         $this->validate($request, [
             'token' => 'required|string',
-            'name' => 'required|string',
+            'email' => 'required|string',
             'password' => 'required|confirmed',
         ]);
-        JWTAuth::getToken();
-        JWTAuth::parseToken()->authenticate();
-        if ( ! $request->user() ) {
-            return response()->json('Invalid token', 401);
-        }
-        try
-        {
-            $user = User::where('name',$request->name)->first()->update(['password' => $request->password]);
-        }
-        catch (Exception $e)
-        {
-            return response()->json(['password' => 'Error while resetting passsword, please try again'], 401);
-        }
-        return response()->json('Password reset Succesfully');
+
+        $user = User::where('email', $request->email)
+                    ->update(['password' => Hash::make($request->password)]);
+
+        DB::table('password_resets')->where(['email'=> $request->email])->delete();
+     
+        return response()->json(['status' => 200]);
     }
     public function emailRequestVerification(Request $request)
     {
-        // return $request->all();
+        $this->validate($request, [
+            'token' => 'required|string',
+        ]);
+        JWTAuth::getToken();
+        JWTAuth::parseToken()->authenticate();
         if ( $request->user()->hasVerifiedEmail() ) {
-            return response()->json('Email address is already verified.');
+            return response()->json(['status' => 201,'msg'=>'Email address '.$request->user()->getEmailForVerification().' is already verified.']);
         }
         
         $request->user()->sendEmailVerificationNotification();
@@ -110,10 +131,12 @@ class AuthController extends Controller
             }
             
         if ( $request->user()->hasVerifiedEmail() ) {
-            return response()->json('Email address '.$request->user()->getEmailForVerification().' is already verified.');
+            return response()->json(['status' => 201,'msg'=>'Email address '.$request->user()->getEmailForVerification().' is already verified.']);
         }
         $request->user()->markEmailAsVerified();
-        return response()->json('Email address '. $request->user()->email.' successfully verified.');
+        return response()->json([
+            'status'=>200,
+            'msg'=> 'Email address '. $request->user()->email.' successfully verified.']);
     }
 
 }

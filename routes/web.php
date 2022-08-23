@@ -2,7 +2,9 @@
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 /** @var \Laravel\Lumen\Routing\Router $router */
-
+// header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+// header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization, Accept,charset,boundary,Content-Length');
+// header('Access-Control-Allow-Origin: *');
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -13,39 +15,48 @@ use Illuminate\Support\Facades\DB;
 | and give it the Closure to call when that URI is requested.
 |
 */
+/**
+ * Login and signup routes
+ */
 $router->post('/login', [
     'as' => 'login', 'uses' => 'AuthController@login'
 ]);
 $router->post('/signup', [
     'as' => 'signup', 'uses' => 'AuthController@signup'
 ]);
-// $router->get('/users/create',[
-//     'as' => 'users.create','uses' => 'UserController@create'
-// ])->middleware('can:create-users');
-// $router->post('/sendemail', [
-//     'as' => 'sendemail', 'uses' => 'EmailController@emailRequestVerification']);
-$router->group(['middleware' => ['auth', 'verified']], function () use ($router) {
-    $router->post('/email/request-verification', [
-        'as' => 'email.request.verification', 
-        'uses' => 'AuthController@emailRequestVerification']);
-});
-$router->post('/email/forgot-password',[
+/**
+ * routes for verification of email, reset password and forgot password
+ */
+$router->post('/request-verification', [
+    'middleware' => ['auth', 'verified'],
+    'as' => 'email.request.verification', 
+    'uses' => 'AuthController@emailRequestVerification'
+]);
+$router->post('/forgot-password',[
     'as' => 'email.forgot-password', 'uses' => 'AuthController@forgot_password'
 ]);
-$router->post('/email/reset-password',[
+$router->post('/reset-password',[
     'as' => 'email.reset-password', 'uses' => 'AuthController@reset_password'
 ]);
 
-$router->post('/email/verify', [
+$router->post('/verify', [
     'as' => 'email.verify', 'uses' => 'AuthController@emailVerify']);
+/**
+ * Creation of user by another user
+ */
 $router->post('/users/create-user',[
     'as' => 'users.create-user', 'uses' => 'UserController@create_user'
 ]);
+/**
+ * Basic filtering and listing of users
+ */
 $router->post('/users/list',[
     'as' => 'users.list', 'uses' => 'UserController@list'
 ]);
-$router->post('admin/create-user', [
+/**
+ * Deletion of user, only done by the Admin
+ */
+$router->post('admin/delete-user', [
     'middleware' => 'auth',
-    'uses' => 'AdminController@create_user'
+    'uses' => 'AdminController@delete_user'
 ]);
-$router->post('/password/reset-request', 'EmailController@sendResetLinkEmail');

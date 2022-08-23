@@ -22,14 +22,12 @@ class UserController extends Controller
 		$this->model = $model;
 	}
 
-    public function create(Request $request){
-        // if (User::where('email', '=', $request->email)->count() > 0) {
-        //     return "email id already exists";
-        // }
-        // if (User::where('name', '=', $request->name)->count() > 0) {
-        //     return "username already exists";
-        // }
-        
+    public function create_user(Request $request)
+    {
+        /**
+         * Creating a user by another user
+         * Called during the session of a user
+         */
         $user = new User();
         $user->name = $request->name;
         $user->password = Hash::make($request->password);
@@ -39,28 +37,47 @@ class UserController extends Controller
         $user->deleted_by = "-";
         $user->save();
         
-        // return $request->all();
     }
     public function list(Request $request){
+        /**
+         * Sorting and Filtering of the users 
+         */
         $builder = $this->model;
-
 		if($request->has('id')) {
-			$builder = $builder->where('id', $request->input('id'));
+            if (is_string($request->input('id'))){
+                $builder = $builder->where('id', $request->input('id'));
+            }
 		}
 
 		if($request->has('name')) {
-			$builder = $builder->where('name', 'LIKE', '%'.$request->input('name').'%');
+            if (is_string($request->input('name'))){
+                $builder = $builder->where('name', 'LIKE', '%'.$request->input('name').'%');
+            }
 		}
-
 		if($request->has('email')) {
-			$builder = $builder->where('email', 'LIKE', '%'.$request->input('email').'%');
+            if (is_string($request->input('email'))){
+                $builder = $builder->where('email', 'LIKE', '%'.$request->input('email').'%');
+            }
 		}
 
 		if($request->has('role')) {
-			$builder = $builder->where('role', $request->input('role'));
+            if (is_string($request->input('role'))){
+                $builder = $builder->where('role', 'LIKE','%'.$request->input('role').'%.');
+            }
 		}
         if($request->has('created_by')){
-            $builder = $builder->whereIn('created_by',$request->input('created_by'));
+            if (is_string($request->input('created_by'))){
+                $builder = $builder->where('created_by','LIKE','%'.$request->input('created_by').'%');
+            }
+        }
+
+        if($request->has('sort_by')){
+            if($request->has('order')){
+                $builder = $builder->orderBy($request->input('sort_by'),$request->input('order'));
+            }
+            else{
+                $builder = $builder->orderBy($request->input('sort_by'),'ASC');
+            }
         }
 
 		$users = $builder->get();

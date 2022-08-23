@@ -11,10 +11,12 @@ use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
 use App\Traits\MustVerifyEmail;
 use Tymon\JWTAuth\Contracts\JWTSubject;
-
-class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject
+use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Auth\Passwords\CanResetPassword;
+use App\Notifications\ForgotPassword as ResetPasswordNotification;
+class User extends Model implements AuthenticatableContract, AuthorizableContract, JWTSubject, CanResetPasswordContract
 {
-    use Authenticatable, Authorizable, Notifiable, MustVerifyEmail, HasRoles;
+    use Authenticatable, Authorizable, Notifiable, MustVerifyEmail, HasRoles, CanResetPassword;
 
     /**
      * The attributes that are mass assignable.
@@ -63,6 +65,10 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return [];
     }
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
     protected static function boot()
     {
         parent::boot();
@@ -77,5 +83,4 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
             }
         });
     }
-    
 }

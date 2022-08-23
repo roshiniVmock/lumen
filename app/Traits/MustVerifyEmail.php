@@ -36,11 +36,15 @@ trait MustVerifyEmail
         // Notification::send($this, new VerifyEmail);
         $this->notify(new VerifyEmail);
     }
-    public function sendPasswordResetNotification()
+    // public function sendPasswordResetNotification()
+    // {
+    //     $this->notify(new ForgotPassword);
+    // }
+    public function sendWelcomeEmailNotification()
     {
-        $this->notify(new ForgotPassword);
+        $this->notify(new WelcomeEmail);
     }
-/**
+    /**
      * Get the email address that should be used for verification.
      *
      * @return string
