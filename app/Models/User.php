@@ -69,6 +69,17 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         $this->notify(new ResetPasswordNotification($token));
     }
+
+    public function tasks()
+    {
+        return $this->hasMany('App\Models\Task', 'creator', 'name');
+    }
+
+    public function assignedTasks()
+    {
+        return $this->hasMany(Task::class,'assignee','name');
+    }
+
     protected static function boot()
     {
         parent::boot();

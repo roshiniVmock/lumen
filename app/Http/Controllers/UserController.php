@@ -28,6 +28,11 @@ class UserController extends Controller
          * Creating a user by another user
          * Called during the session of a user
          */
+        $this->validate($request, [
+            'name' => 'required|string|unique:users',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string',
+        ]);
         $user = new User();
         $user->name = $request->name;
         $user->password = Hash::make($request->password);
@@ -43,40 +48,28 @@ class UserController extends Controller
          * Sorting and Filtering of the users 
          */
         $builder = $this->model;
-		if($request->has('id')) {
-            if (is_string($request->input('id'))){
-                $builder = $builder->where('id', $request->input('id'));
-            }
+
+		if($request->has('name') && $request->name != []) {
+            $builder = $builder->whereIn('name', $request->input('name'));
+		}
+		if($request->has('email') && $request->email != []) {
+            $builder = $builder->whereIn('email', $request->input('email'));
+
 		}
 
-		if($request->has('name')) {
-            if (is_string($request->input('name'))){
-                $builder = $builder->where('name', 'LIKE', '%'.$request->input('name').'%');
-            }
-		}
-		if($request->has('email')) {
-            if (is_string($request->input('email'))){
-                $builder = $builder->where('email', 'LIKE', '%'.$request->input('email').'%');
-            }
-		}
-
-		if($request->has('role')) {
+		if($request->has('role')&& $request->role != '') {
             if (is_string($request->input('role'))){
-                $builder = $builder->where('role', 'LIKE','%'.$request->input('role').'%.');
+                $builder = $builder->where('role', $request->input('role'));
             }
 		}
-        if($request->has('created_by')){
-            if (is_string($request->input('created_by'))){
-                $builder = $builder->where('created_by','LIKE','%'.$request->input('created_by').'%');
-            }
+        if($request->has('created_by')&& $request->created_by != []){
+            $builder = $builder->whereIn('created_by', $request->input('created_by'));
+
         }
 
-        if($request->has('sort_by')){
+        if($request->has('sort_by') && $request->sort_by != ''){
             if($request->has('order')){
                 $builder = $builder->orderBy($request->input('sort_by'),$request->input('order'));
-            }
-            else{
-                $builder = $builder->orderBy($request->input('sort_by'),'ASC');
             }
         }
 
@@ -86,3 +79,4 @@ class UserController extends Controller
     
     
 }
+;

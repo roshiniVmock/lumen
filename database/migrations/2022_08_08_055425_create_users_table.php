@@ -24,7 +24,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->timestamps();
         });
-        echo Schema::hasTable('users');
+        // echo Schema::hasTable('users');
     }
 
     /**

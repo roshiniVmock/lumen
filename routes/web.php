@@ -2,9 +2,9 @@
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
 /** @var \Laravel\Lumen\Routing\Router $router */
-// header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-// header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization, Accept,charset,boundary,Content-Length');
-// header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization, Accept,charset,boundary,Content-Length');
+header('Access-Control-Allow-Origin: *');
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -60,3 +60,41 @@ $router->post('admin/delete-user', [
     'middleware' => 'auth',
     'uses' => 'AdminController@delete_user'
 ]);
+
+
+
+/**
+ * Task Management
+ */
+
+ $router->post('/tasks/view/assigned',[
+    'as' => 'tasks.view', 'uses' => 'TaskController@assignedList'
+ ]);
+
+ $router->post('/tasks/view/created',[
+    'as' => 'tasks.view', 'uses' => 'TaskController@createdList'
+ ]);
+
+ $router->post('/tasks/create',[
+    'as' => 'tasks.create', 'uses' => 'TaskController@create'
+ ]);
+
+ $router->post('/tasks/update',[
+    'as' => 'tasks.update', 'uses' => 'TaskController@update'
+ ]);
+
+ $router->post('tasks/updateStatus',[
+    'as' => 'tasks.updateStatus', 'uses' => 'TaskController@updateStatus'
+ ]);
+ $router->post('tasks/upcoming',[
+    'as' => 'tasks.upcoming', 'uses' => 'TaskController@upcoming'
+ ]);
+ $router->post('tasks/overdue',[
+    'as' => 'tasks.overdue', 'uses' => 'TaskController@overdue'
+ ]);
+ $router->post('tasks/complete',[
+    'as' => 'tasks.complete', 'uses' => 'TaskController@complete'
+ ]);
+ $router->post('tasks/inProgress',[
+    'as' => 'tasks.inProgress', 'uses' => 'TaskController@inProgress'
+ ]);
