@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Events\TaskAdded;
 class Task extends Model
 {
     protected $fillable = [
@@ -23,7 +23,11 @@ class Task extends Model
     {
         return $this->belongsTo('App\Models\User','name','creator');
     }
+    protected $dispatchesEvents = [
 
+        'created' => TaskAdded::class,
+        
+    ];
     protected $primaryKey = 'title';
     public $incrementing = false;
 }

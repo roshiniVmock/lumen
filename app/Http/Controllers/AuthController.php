@@ -11,6 +11,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use DB;
+use Carbon\Carbon;
 class AuthController extends Controller
 {
     

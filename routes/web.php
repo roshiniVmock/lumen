@@ -1,9 +1,11 @@
 <?php
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+
 /** @var \Laravel\Lumen\Routing\Router $router */
 header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization, Accept,charset,boundary,Content-Length');
+header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, Authorization, Accept,charset,boundary,Content-Length,authorization');
 header('Access-Control-Allow-Origin: *');
 /*
 |--------------------------------------------------------------------------
@@ -61,12 +63,15 @@ $router->post('admin/delete-user', [
     'uses' => 'AdminController@delete_user'
 ]);
 
-
-
+$router->post('/broadcasting/auth', [
+    'middleware' => 'auth',
+    'as' => 'broadcast.authenticate', 
+    'uses' => 'BroadcastController@authenticate'
+]);
 /**
  * Task Management
  */
-
+// Auth::routes();
  $router->post('/tasks/view/assigned',[
     'as' => 'tasks.view', 'uses' => 'TaskController@assignedList'
  ]);

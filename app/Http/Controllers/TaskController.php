@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\User;
+use App\Events\TaskAdded;
+use App\Events\TaskStatusChange;
+use App\Notifications\TaskCreated;
+use App\Notifications\TaskStatusChanged;
 class TaskController extends Controller
 {
     protected $model;
@@ -17,7 +21,7 @@ class TaskController extends Controller
     public function create(Request $request)
     {
         $this->validate($request, [
-            'title' => 'required|string',
+            'title' => 'required|string|unique:tasks',
         ]);
         $task = new Task();
         $task->title = $request->title;
@@ -27,7 +31,12 @@ class TaskController extends Controller
         $task->dueDate = $request->dueDate;
         $task->description = $request->description;
         $task->status = 'Assigned';
+        // dispatch(new TaskAdded($task));
         $task->save();
+        // return response($task,201);
+        event(new TaskAdded($task));
+        $user = User::where('name',$task->assignee)->first();
+        $user->notify(new TaskCreated($task));
     }
 
     public function update(Request $request)
@@ -48,18 +57,16 @@ class TaskController extends Controller
 
     public function updateStatus(Request $request)
     {
-        $task = Task::where('title',$request->title)->update(['status'=>$request->status]);
+        $task = Task::where('title',$request->title)->first();
+        $user = User::where('name',$task->creator)->first();
+        $task->update(['status'=>$request->status]);
+        event(new TaskStatusChange($task));
+        $user->notify(new TaskStatusChanged($task));
     }
 
     public function assignedList(Request $request)
     {
-        // $id = (User::where('email',$request->email))->get(['id']);
-        // $builder = $this->model;
-        // $assignedTasks = $builder->find($id);
-        // dd($assignedTasks->tasks);
-        // $createdTasks = $buidler->find(1)->createTasks;
         $role = User::where('email',$request->email)->get(['role']);
-        // $tasks = $builder->find(1)->(assignedTasks or createTasks);
         $assignedTasks = Task::where('assignee',$request->name);
         if ($role === 'Admin'){
             $assignedTasks = Task::all();
