@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Support\Facades\Auth;
+use \Tymon\JWTAuth\Facades\JWTAuth;
 
 class Authenticate
 {
@@ -23,6 +24,11 @@ class Authenticate
      */
     public function handle($request, Closure $next, $guard = null)
     {
+        JWTAuth::getToken();
+        JWTAuth::parseToken()->authenticate();
+        if (! $request->user()){
+            return response()->json(["status"=>403,"msg"=>"Unauthorized"]);
+        }
         return $next($request);
     }
 }

@@ -40,12 +40,12 @@ class TaskStatusChanged extends Notification
      */
     public function toMail($notifiable)
     {   
-        $loginUrl = url("http://localhost:3000/sign-in");
+        $loginUrl = url("http://localhost:3000/createdTasks");
         return (new MailMessage)
                     ->subject('Change of status for task titled '.$this->task->title)
                     ->greeting('Hello '.$this->task->creator.',')
                     ->line('The status of the task "'.$this->task->title.'" created by you has been changed by '.$this->task->assignee)
-                    ->action('Click here to login', $loginUrl)
+                    ->action('Click here to check it out', $loginUrl)
                     ->line('Thank you for using our application!');
     }
 

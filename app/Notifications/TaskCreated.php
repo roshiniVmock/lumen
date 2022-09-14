@@ -42,12 +42,12 @@ class TaskCreated extends Notification
     public function toMail($notifiable)
     {
         // dd($this->task);
-        $loginUrl = url("http://localhost:3000/sign-in");
+        $loginUrl = url("http://localhost:3000/assignedTasks");
         return (new MailMessage)
-                    ->subject('New task added by '.$this->task->creator)
+                    ->subject('New task titled '.$this->task->title.' added by '.$this->task->creator)
                     ->greeting("Hello ".$this->task->assignee.",")
                     ->line('A new task has been added.')
-                    ->action('Click here to login', $loginUrl)
+                    ->action('Click here to check it out', $loginUrl)
                     ->line('Thank you for using our application!');
     }
 

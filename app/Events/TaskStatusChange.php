@@ -12,7 +12,7 @@ class TaskStatusChange implements ShouldBroadcastNow
 {
     use InteractsWithSockets, SerializesModels;
 
-    public $task;
+    protected $task;
 
     public function __construct($task) {
         $this->task = $task;
@@ -25,7 +25,7 @@ class TaskStatusChange implements ShouldBroadcastNow
      */
     public function broadcastOn() {
         // return ['private-task'.$this->task->id,'tasks'];
-        return new PrivateChannel('task.'.$this->task->assignee);
+        return new PrivateChannel('task.'.$this->task->creator);
     }
 
     public function broadcastWith() {

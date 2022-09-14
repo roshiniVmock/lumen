@@ -4,7 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Laravel\Lumen\Console\Kernel as ConsoleKernel;
-
+use App\Jobs\OverdueTasks;
 class Kernel extends ConsoleKernel
 {
     /**
@@ -13,7 +13,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        \Laravelista\LumenVendorPublish\VendorPublishCommand::class
+        \Laravelista\LumenVendorPublish\VendorPublishCommand::class,
+        \App\Console\Commands\OverdueTasks::class,
+        \App\Console\Commands\ReminderDaily::class,
     ];
 
     /**
@@ -24,6 +26,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+        $schedule->command('reminder:daily')->everyMinute();
+        $schedule->command('overdueTasks:daily')->everyMinute();
+        // $schedule->job(new OverdueTasks)->daily();
     }
 }

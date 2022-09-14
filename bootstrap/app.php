@@ -97,6 +97,7 @@ $app->middleware([
  
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
+    'admin' => App\Http\Middleware\AdminUser::class,
     'verified' => App\Http\Middleware\EnsureEmailIsVerified::class,
     'permission' => Spatie\Permission\Middlewares\PermissionMiddleware::class,
     'role'       => Spatie\Permission\Middlewares\RoleMiddleware::class,
