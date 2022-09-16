@@ -104,10 +104,12 @@ class TaskController extends Controller
     public function assignedList(Request $request)
     {
 
-        $role = User::where('email',$request->email)->get(['role']);
+        // $role = User::where('name',$request->name)->get(['role']);
         $assignedTasks = Task::where('assignee',$request->name);
-        if ($role === 'Admin'){
-            $assignedTasks = Task::all();
+        // Log::info($role[0]);
+        if ($request->name === 'Admin'){
+            $assignedTasks = Task::where('Title','!=',null);
+            // Log::info($assignedTasks->count());
         } 
         if($request->has('keywords') && $request->keywords != []){
             $words = $request->keywords;
@@ -154,8 +156,8 @@ class TaskController extends Controller
     {
         $role = User::where('email',$request->email)->get(['role']);
         $createdTasks = Task::where('creator',$request->name);
-        if ($role === 'Admin'){
-            $createdTasks = Task::all();
+        if ($request->name === 'Admin'){
+            $createdTasks = Task::where('Title','!=',null);
         }   
         if($request->has('keywords') && $request->keywords != []){
             $words = $request->keywords;
@@ -193,6 +195,11 @@ class TaskController extends Controller
         }
         if($request->has('status') && $request->status != ''){
             $createdTasks = $createdTasks->where('status','LIKE','%'.$request->status.'%');
+        }
+        if($request->has('sort_by') && $request->sort_by != ''){
+            if($request->has('order')){
+                $createdTasks = $createdTasks->orderBy($request->input('sort_by'),$request->input('order'));
+            }
         }
         return response()->json($createdTasks->paginate(10));
     }
