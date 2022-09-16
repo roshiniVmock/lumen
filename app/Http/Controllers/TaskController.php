@@ -148,7 +148,7 @@ class TaskController extends Controller
         if($request->has('status') && $request->status != ''){
             $assignedTasks = $assignedTasks->where('status','LIKE','%'.$request->status.'%');
         }
-        return response()->json($assignedTasks->get());
+        return response()->json($assignedTasks->paginate(10));
     }
     public function createdList(Request $request)
     {
@@ -194,7 +194,7 @@ class TaskController extends Controller
         if($request->has('status') && $request->status != ''){
             $createdTasks = $createdTasks->where('status','LIKE','%'.$request->status.'%');
         }
-        return response()->json($createdTasks->get());
+        return response()->json($createdTasks->paginate(10));
     }
     public function upcoming(Request $request)
     {

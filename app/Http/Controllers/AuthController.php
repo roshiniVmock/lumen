@@ -46,11 +46,6 @@ class AuthController extends Controller
         }
 
     }
-    public function sendWelcomeEmail(Request $request){
-        $request->user()->sendWelcomeEmailNotificaton();
-
-        return response()->json('Welcome '. Auth::user()->name);
-    }
     public function login(Request $request)
     {
           //validate incoming request 

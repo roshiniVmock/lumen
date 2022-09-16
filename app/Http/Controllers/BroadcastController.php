@@ -12,7 +12,7 @@ class BroadcastController extends Controller
 {
     public function authenticate(Request $request)
     {
-        $user = Auth::user();
+        // $user = Auth::user();
         JWTAuth::getToken();
         JWTAuth::parseToken()->authenticate();
         // dd($request->user());
